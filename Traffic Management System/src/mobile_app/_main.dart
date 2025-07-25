@@ -29,7 +29,7 @@ class _TrafficPredictionState extends State<TrafficPrediction> {
     final response = await http.post(
       Uri.parse('http://127.0.0.1:5000/predict'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({"temp": 25, "rain_1h": 0, "snow_1h": 0, "clouds_all": 50}),
+      body: jsonEncode({"origin": "Rabat", "destination": "Casablanca"}),
     );
     if (response.statusCode == 200) {
       setState(() {
