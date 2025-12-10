@@ -1,0 +1,52 @@
+# docker/Dockerfile.dashboard
+# Dashboard container
+# =============================================================================
+
+# Builder stage
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN pip install --no-cache-dir --upgrade pip
+
+COPY dashboard/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir gunicorn
+
+# Production stage
+FROM python:3.11-slim AS production
+
+LABEL description="Smart Traffic Dashboard"
+
+ENV PYTHONUNBUFFERED=1 \
+    PORT=8050 \
+    HOST=0.0.0.0
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd --gid 1000 appgroup && \
+    useradd --uid 1000 --gid appgroup --create-home appuser
+
+WORKDIR /app
+
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY --chown=appuser:appgroup dashboard/ ./dashboard/
+COPY --chown=appuser:appgroup data/processed_data/ ./data/processed_data/
+
+RUN mkdir -p /app/logs && chown -R appuser:appgroup /app
+
+USER appuser
+
+EXPOSE 8050
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/ || exit 1
+
+CMD ["sh", "-c", "gunicorn --bind ${HOST}:${PORT} --workers 2 --timeout 120 dashboard.app:server"]
