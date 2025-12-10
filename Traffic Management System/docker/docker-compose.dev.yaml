@@ -1,0 +1,37 @@
+# docker/docker-compose.dev.yaml
+# Development override - use with: docker-compose -f docker-compose.yaml -f docker-compose.dev.yaml up
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: traffic-api-dev
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - ../src/api:/app/api
+      - ../src/agents:/app/agents
+      - ../models:/app/models
+    ports:
+      - "5000:5000"
+      - "5678:5678"  # Debugger port
+    command: python -m flask run --host=0.0.0.0 --port=5000 --reload
+
+  dashboard:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: traffic-dashboard-dev
+    environment:
+      - DASH_DEBUG=true
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - ../dashboard:/app/dashboard
+      - ../data:/app/data
+    ports:
+      - "8050:8050"
+    command: python dashboard/app.py
