@@ -1,0 +1,32 @@
+# docker/Dockerfile.dev
+# Development Dockerfile with hot-reload
+# =============================================================================
+
+FROM python:3.11-slim
+
+# Environment
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    FLASK_ENV=development \
+    FLASK_DEBUG=true \
+    PORT=5000
+
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install Python dependencies
+COPY src/api/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir watchdog  # For hot-reload
+
+# Don't copy code - mount as volume for hot-reload
+
+EXPOSE 5000
+
+# Development server with reload
+CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000", "--reload"]
