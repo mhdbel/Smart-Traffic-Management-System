@@ -1,23 +1,32 @@
 name: traffic_app
-description: A mobile app for real-time traffic predictions.
-
+description: Smart Traffic Management Mobile App
 publish_to: 'none'
-
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.19.0 <3.0.0"
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.15.0
-  google_maps_flutter: ^2.5.0
+  
+  # HTTP client
+  http: ^1.1.0
+  
+  # State management
+  provider: ^6.1.1
+  
+  # Icons
+  cupertino_icons: ^1.0.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
+  
+  # Testing
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
 
 flutter:
   uses-material-design: true
